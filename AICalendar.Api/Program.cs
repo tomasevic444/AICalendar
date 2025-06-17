@@ -1,23 +1,9 @@
 // CalendarApp.Api/Program.cs
+using AICalendar.Application.Interfaces;
 using AICalendar.Infrastructure.Data;
+using AICalendar.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// --- TEMPORARY DEBUGGING ---
-Console.WriteLine("--- API Configuration Sources ---");
-foreach (var source in builder.Configuration.Sources)
-{
-    Console.WriteLine($"Source: {source.GetType().Name}");
-}
-Console.WriteLine("--- API Configuration Values (ConnectionStrings section) ---");
-var connectionStringsSection = builder.Configuration.GetSection("ConnectionStrings");
-foreach (var kvp in connectionStringsSection.AsEnumerable(makePathsRelative: true)) // makePathsRelative for brevity
-{
-    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-}
-string? debugMongoConnString = builder.Configuration.GetConnectionString("mongodb");
-Console.WriteLine($"DEBUG: Value from GetConnectionString(\"mongodb\"): '{debugMongoConnString}'");
-// --- END TEMPORARY DEBUGGING ---
 
 builder.AddServiceDefaults();
 
@@ -37,7 +23,8 @@ builder.Services.AddSingleton<CalendarMongoDbContext>();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer(); 
-builder.Services.AddSwaggerGen();      
+builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
