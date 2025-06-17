@@ -33,11 +33,15 @@ namespace AICalendar.Infrastructure.Data
 
         public async Task CreateIndexesAsync()
         {
-            // Example for Users collection: Unique index on Username
-            var userUsernameIndexKeysDefinition = Builders<UserDocument>.IndexKeys.Ascending(u => u.Username);
+            // User Username Index
+            var userUsernameIndexKeys = Builders<UserDocument>.IndexKeys.Ascending(u => u.Username);
             var userUsernameIndexOptions = new CreateIndexOptions { Unique = true };
-            var userUsernameIndexModel = new CreateIndexModel<UserDocument>(userUsernameIndexKeysDefinition, userUsernameIndexOptions);
-            await Users.Indexes.CreateOneAsync(userUsernameIndexModel);
+            await Users.Indexes.CreateOneAsync(new CreateIndexModel<UserDocument>(userUsernameIndexKeys, userUsernameIndexOptions));
+
+            // User Email Index 
+            var userEmailIndexKeys = Builders<UserDocument>.IndexKeys.Ascending(u => u.Email);
+            var userEmailIndexOptions = new CreateIndexOptions { Unique = true };
+            await Users.Indexes.CreateOneAsync(new CreateIndexModel<UserDocument>(userEmailIndexKeys, userEmailIndexOptions));
 
             // Example for Events collection: Index on OwnerUserId, StartTimeUtc, EndTimeUtc
             var eventOwnerIndex = Builders<EventDocument>.IndexKeys.Ascending(e => e.OwnerUserId);

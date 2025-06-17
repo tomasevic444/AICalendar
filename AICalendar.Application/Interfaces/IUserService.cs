@@ -15,7 +15,7 @@ namespace AICalendar.Application.Interfaces
         Task<UserResponseDto?> GetUserResponseByIdAsync(string userId); // Returns DTO for API responses
         Task<UserDocument?> GetUserByUsernameAsync(string username); // For login
         Task<IEnumerable<UserResponseDto>> GetAllUsersAsync(/* Add filtering/pagination params later if needed */);
-       // Task<(bool Success, string? ErrorMessage)> UpdateUserAsync(string userId, UpdateUserRequestDto updateUserDto, string currentUserId); // currentUserId for auth checks
+        Task<(bool Success, string? ErrorMessage)> UpdateUserAsync(string userId, UpdateUserRequestDto updateUserDto, string currentUserId); // currentUserId for auth checks
         Task<(bool Success, string? ErrorMessage)> DeleteUserAsync(string userIdToDelete, string currentUserId); // currentUserId for auth checks
                                                                                                                  // bool VerifyPassword(string password, string passwordHash); // This might be better internal to the implementation or an Auth service
     }

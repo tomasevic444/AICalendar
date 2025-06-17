@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AICalendar.Application.DTOs.User
+namespace AICalendar.Application.DTOs.User 
 {
     public class CreateUserRequestDto
     {
@@ -9,7 +9,15 @@ namespace AICalendar.Application.DTOs.User
         public string Username { get; set; } = string.Empty;
 
         [Required]
-        [MinLength(6)] // Example minimum password length
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(6)]
         public string Password { get; set; } = string.Empty;
+
+        public string? FirstName { get; set; } 
+
+        public string? LastName { get; set; }  
     }
 }
