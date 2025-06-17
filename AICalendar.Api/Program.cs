@@ -84,6 +84,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventParticipantService, EventParticipantService>();
+builder.Services.AddScoped<ISlotFindingService, SlotFindingService>();
 
 // --- JWT Authentication Setup ---
 builder.Services.AddAuthentication(options =>
