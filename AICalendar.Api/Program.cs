@@ -2,8 +2,11 @@
 using AICalendar.Application.Interfaces;
 using AICalendar.Infrastructure.Data;
 using AICalendar.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,15 +49,68 @@ builder.Services.AddVersionedApiExplorer(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Example: Add a swagger doc for each discovered API version
-    // This requires IApiVersionDescriptionProvider, which you get from AddVersionedApiExplorer
-    // You might need to resolve IApiVersionDescriptionProvider in the lambda using a service provider
-    // For now, a basic setup is fine. We can refine Swagger later.
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "AICalendar API", Version = "v1" });
 
-    // TODO: Add JWT Authentication to Swagger UI later
+    // --- Add this section for JWT Authentication to Swagger UI ---
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter into field the word 'Bearer' following by space and JWT",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey, // Using ApiKey for Bearer token input
+        Scheme = "Bearer" // The scheme name, "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer" // This Id must match the Id in AddSecurityDefinition
+                },
+                Scheme = "oauth2", 
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>() // List of scopes (if any, empty for simple Bearer)
+        }
+    });
+    // --- End JWT Authentication Swagger UI section ---
 });
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// --- JWT Authentication Setup ---
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true; // Optional: saves the token in HttpContext.Features
+    options.RequireHttpsMetadata = builder.Environment.IsProduction(); // Enforce HTTPS in production
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true, // Checks token expiration
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            builder.Configuration["JwtSettings:SecretKey"]
+            ?? throw new InvalidOperationException("JWT SecretKey not configured."))),
+        ClockSkew = TimeSpan.Zero // Optional: remove default 5-min leeway on expiration
+    };
+});
+
+builder.Services.AddAuthorization(); // Ensure Authorization services are added
+// --- End JWT Authentication Setup ---
 
 var app = builder.Build();
 
