@@ -83,6 +83,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IEventParticipantService, EventParticipantService>();
 
 // --- JWT Authentication Setup ---
 builder.Services.AddAuthentication(options =>
